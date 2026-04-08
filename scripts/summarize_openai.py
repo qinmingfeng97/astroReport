@@ -24,7 +24,6 @@ def _load_skill_text() -> str:
             continue
     return ""
 
-
 def _build_chat_url(api_base: str | None) -> str:
     if not api_base:
         return OPENAI_CHAT_URL
