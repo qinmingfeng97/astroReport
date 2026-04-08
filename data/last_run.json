@@ -4,6 +4,6 @@
   "removed_duplicates": 6,
   "dedup_lookback_days": 15,
   "papers": 40,
-  "email_sent": false,
-  "generated_at": "2026-04-08T03:57:24.737246+00:00"
+  "email_sent": true,
+  "generated_at": "2026-04-08T03:59:20.046782+00:00"
 }
