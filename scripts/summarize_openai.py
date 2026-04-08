@@ -164,7 +164,7 @@ def summarize_papers(
 
     for attempt in range(max_retries):
         try:
-            with urllib.request.urlopen(req, timeout=90) as resp:
+            with urllib.request.urlopen(req, timeout=300) as resp:
                 content = json.loads(resp.read().decode("utf-8"))
             raw = content["choices"][0]["message"]["content"]
             parsed = json.loads(raw)
