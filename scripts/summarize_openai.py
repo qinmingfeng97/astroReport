@@ -212,12 +212,12 @@ def summarize_papers(
         }
 #    except Exception:
 #        return _fallback_summary(papers)
-except Exception as e:
-    import traceback
-    print("=== AI 调用失败 ===")
-    print(f"错误类型: {type(e).__name__}")
-    print(f"错误信息: {e}")
-    print("详细堆栈:")
-    traceback.print_exc()
-    print("=== 降级到原始摘要 ===")
-    return _fallback_summary(papers)
+    except Exception as e:
+        import traceback
+        print("=== AI 调用失败 ===")
+        print(f"错误类型: {type(e).__name__}")
+        print(f"错误信息: {e}")
+        print("详细堆栈:")
+        traceback.print_exc()
+        print("=== 降级到原始摘要 ===")
+        return _fallback_summary(papers)
