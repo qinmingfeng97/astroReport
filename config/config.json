@@ -1,7 +1,7 @@
 {
   "arxiv": {
-    "categories": ["astro-ph.EP", "astro-ph.SR", "astro-ph.GA"],
-    "max_results": 200,
+    "categories": ["astro-ph.SR", "astro-ph.GA"],
+    "max_results": 120,
     "lookback_hours": 36
   },
   "report": {
@@ -9,7 +9,6 @@
     "retention_days": 5
   },
   "mail_list": [
-    "astrocang@gmail.com",
-    "he.zhao@oca.eu"
+    "qmingfeng163@163.com"
   ]
 }
