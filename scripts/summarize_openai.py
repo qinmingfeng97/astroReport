@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import time
 import json
 import urllib.request
 from pathlib import Path
@@ -157,11 +157,30 @@ def summarize_papers(
         method="POST",
     )
 
+#    try:
+#        with urllib.request.urlopen(req, timeout=90) as resp:
+#            content = json.loads(resp.read().decode("utf-8"))
+ #       raw = content["choices"][0]["message"]["content"]
+ #       parsed = json.loads(raw)
+   
+
+max_retries = 5
+retry_delay = 5  # 初始等待5秒
+
+for attempt in range(max_retries):
     try:
         with urllib.request.urlopen(req, timeout=90) as resp:
             content = json.loads(resp.read().decode("utf-8"))
         raw = content["choices"][0]["message"]["content"]
         parsed = json.loads(raw)
+        break  # 成功则跳出循环
+    except urllib.error.HTTPError as e:
+        if e.code == 429 and attempt < max_retries - 1:
+            wait_time = retry_delay * (attempt + 1)  # 5, 10, 15, 20, 25秒
+            print(f"触发限流 (429)，等待 {wait_time} 秒后重试... (尝试 {attempt + 1}/{max_retries})")
+            time.sleep(wait_time)
+        else:
+            raise  # 其他错误或重试用尽，抛出异常
 
         items_by_id = {
             item.get("id", ""): item
