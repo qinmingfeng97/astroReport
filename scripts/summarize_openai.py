@@ -1,6 +1,8 @@
 from __future__ import annotations
-import time
+
 import json
+import time
+import traceback
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -23,6 +25,7 @@ def _load_skill_text() -> str:
         except Exception:
             continue
     return ""
+
 
 def _build_chat_url(api_base: str | None) -> str:
     if not api_base:
@@ -156,86 +159,85 @@ def summarize_papers(
         method="POST",
     )
 
-#    try:
-#        with urllib.request.urlopen(req, timeout=90) as resp:
-#            content = json.loads(resp.read().decode("utf-8"))
- #       raw = content["choices"][0]["message"]["content"]
- #       parsed = json.loads(raw)
-   
+    max_retries = 5
+    retry_delay = 5
 
-max_retries = 5
-retry_delay = 5  # 初始等待5秒
+    for attempt in range(max_retries):
+        try:
+            with urllib.request.urlopen(req, timeout=90) as resp:
+                content = json.loads(resp.read().decode("utf-8"))
+            raw = content["choices"][0]["message"]["content"]
+            parsed = json.loads(raw)
 
-for attempt in range(max_retries):
-    try:
-        with urllib.request.urlopen(req, timeout=90) as resp:
-            content = json.loads(resp.read().decode("utf-8"))
-        raw = content["choices"][0]["message"]["content"]
-        parsed = json.loads(raw)
-        break  # 成功则跳出循环
-    except urllib.error.HTTPError as e:
-        if e.code == 429 and attempt < max_retries - 1:
-            wait_time = retry_delay * (attempt + 1)  # 5, 10, 15, 20, 25秒
-            print(f"触发限流 (429)，等待 {wait_time} 秒后重试... (尝试 {attempt + 1}/{max_retries})")
-            time.sleep(wait_time)
-        else:
-            raise  # 其他错误或重试用尽，抛出异常
+            items_by_id = {
+                item.get("id", ""): item
+                for item in parsed.get("items", [])
+            }
+            items = []
+            for paper in papers:
+                item = items_by_id.get(paper.get("id", ""), {})
+                items.append({
+                    "id": paper.get("id", ""),
+                    "summary": item.get("summary", "").strip() or "摘要生成失败，已降级。",
+                    "keywords": item.get("keywords", [])[:3],
+                })
 
-        items_by_id = {
-            item.get("id", ""): item
-            for item in parsed.get("items", [])
-        }
-        items = []
-        for paper in papers:
-            item = items_by_id.get(paper.get("id", ""), {})
-            items.append({
-                "id": paper.get("id", ""),
-                "summary": item.get("summary", "").strip() or "摘要生成失败，已降级。",
-                "keywords": item.get("keywords", [])[:3],
-            })
+            summary_text = parsed.get("global_summary", "").strip() or "今日文献摘要已生成。"
+            related_ids = parsed.get("related_ids", [])
+            if not isinstance(related_ids, list):
+                related_ids = []
+            paper_ids = {paper.get("id", "") for paper in papers}
+            related_ids = [
+                rid for rid in related_ids
+                if isinstance(rid, str) and rid in paper_ids
+            ][:5]
 
-        summary_text = parsed.get("global_summary", "").strip() or "今日文献摘要已生成。"
-        related_ids = parsed.get("related_ids", [])
-        if not isinstance(related_ids, list):
-            related_ids = []
-        paper_ids = {paper.get("id", "") for paper in papers}
-        related_ids = [
-            rid for rid in related_ids
-            if isinstance(rid, str) and rid in paper_ids
-        ][:5]
+            valid_range = set(range(1, len(papers) + 1))
+            raw_groups = parsed.get("groups", [])
+            groups: list[dict] = []
+            if isinstance(raw_groups, list):
+                for g in raw_groups:
+                    if not isinstance(g, dict):
+                        continue
+                    label = str(g.get("label", "")).strip()
+                    raw_indices = g.get("indices", [])
+                    if not label or not isinstance(raw_indices, list):
+                        continue
+                    valid_indices = [
+                        int(i) for i in raw_indices
+                        if isinstance(i, (int, float)) and int(i) in valid_range
+                    ]
+                    if valid_indices:
+                        groups.append({"label": label, "indices": valid_indices})
 
-        valid_range = set(range(1, len(papers) + 1))
-        raw_groups = parsed.get("groups", [])
-        groups: list[dict] = []
-        if isinstance(raw_groups, list):
-            for g in raw_groups:
-                if not isinstance(g, dict):
-                    continue
-                label = str(g.get("label", "")).strip()
-                raw_indices = g.get("indices", [])
-                if not label or not isinstance(raw_indices, list):
-                    continue
-                valid_indices = [
-                    int(i) for i in raw_indices
-                    if isinstance(i, (int, float)) and int(i) in valid_range
-                ]
-                if valid_indices:
-                    groups.append({"label": label, "indices": valid_indices})
+            return {
+                "global_summary": summary_text,
+                "related_ids": related_ids,
+                "groups": groups,
+                "items": items,
+            }
 
-        return {
-            "global_summary": summary_text,
-            "related_ids": related_ids,
-            "groups": groups,
-            "items": items,
-        }
-#    except Exception:
-#        return _fallback_summary(papers)
-    except Exception as e:
-        import traceback
-        print("=== AI 调用失败 ===")
-        print(f"错误类型: {type(e).__name__}")
-        print(f"错误信息: {e}")
-        print("详细堆栈:")
-        traceback.print_exc()
-        print("=== 降级到原始摘要 ===")
-        return _fallback_summary(papers)
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and attempt < max_retries - 1:
+                wait_time = retry_delay * (attempt + 1)
+                print(f"触发限流 (429)，等待 {wait_time} 秒后重试... (尝试 {attempt + 1}/{max_retries})")
+                time.sleep(wait_time)
+            else:
+                print("=== AI 调用失败 ===")
+                print(f"错误类型: HTTPError")
+                print(f"错误码: {e.code}")
+                print(f"错误信息: {e.reason}")
+                traceback.print_exc()
+                print("=== 降级到原始摘要 ===")
+                return _fallback_summary(papers)
+
+        except Exception as e:
+            print("=== AI 调用失败 ===")
+            print(f"错误类型: {type(e).__name__}")
+            print(f"错误信息: {e}")
+            traceback.print_exc()
+            print("=== 降级到原始摘要 ===")
+            return _fallback_summary(papers)
+
+    # 如果所有重试都失败
+    return _fallback_summary(papers)
