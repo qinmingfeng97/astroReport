@@ -1,6 +1,43 @@
 {
   "reports": [
     {
+      "date": "2026-05-05",
+      "title": "astroReport 日报 2026-05-05",
+      "guid": "astroreport-2026-05-05",
+      "created_at": "2026-05-05T05:16:31.053647+00:00",
+      "expire_at": "2026-05-10T05:16:31.053647+00:00",
+      "report_path": "reports/2026-05-05.md",
+      "digest_path": "reports/2026-05-05.digest.md",
+      "report_url": "https://github.com/qinmingfeng97/astroReport/blob/main/reports/2026-05-05.md",
+      "digest_summary": "今日文献已更新。以下为自动生成的精简摘要。",
+      "paper_links": [
+        "https://arxiv.org/abs/2605.02875v1",
+        "https://arxiv.org/abs/2605.02843v1",
+        "https://arxiv.org/abs/2605.02837v1",
+        "https://arxiv.org/abs/2605.02828v1",
+        "https://arxiv.org/abs/2605.02822v1",
+        "https://arxiv.org/abs/2605.02796v1",
+        "https://arxiv.org/abs/2605.02769v1",
+        "https://arxiv.org/abs/2605.02687v1",
+        "https://arxiv.org/abs/2605.02663v1",
+        "https://arxiv.org/abs/2605.02648v1",
+        "https://arxiv.org/abs/2605.02539v1",
+        "https://arxiv.org/abs/2605.02508v1",
+        "https://arxiv.org/abs/2605.02493v1",
+        "https://arxiv.org/abs/2605.02353v1",
+        "https://arxiv.org/abs/2605.02238v1",
+        "https://arxiv.org/abs/2605.02216v1",
+        "https://arxiv.org/abs/2605.02138v1",
+        "https://arxiv.org/abs/2605.02055v1",
+        "https://arxiv.org/abs/2605.02053v1",
+        "https://arxiv.org/abs/2605.02032v1",
+        "https://arxiv.org/abs/2605.02022v1",
+        "https://arxiv.org/abs/2605.01994v1",
+        "https://arxiv.org/abs/2605.01993v1",
+        "https://arxiv.org/abs/2605.01981v1"
+      ]
+    },
+    {
       "date": "2026-05-04",
       "title": "astroReport 日报 2026-05-04",
       "guid": "astroreport-2026-05-04",
