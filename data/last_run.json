@@ -1,9 +1,9 @@
 {
-  "report_date": "2026-08-18",
-  "fetched_papers": 25,
-  "removed_duplicates": 0,
+  "report_date": "2026-08-19",
+  "fetched_papers": 48,
+  "removed_duplicates": 8,
   "dedup_lookback_days": 15,
-  "papers": 25,
+  "papers": 40,
   "email_sent": true,
-  "generated_at": "2026-08-18T02:55:55.148130+00:00"
+  "generated_at": "2026-08-19T02:57:27.935197+00:00"
 }
